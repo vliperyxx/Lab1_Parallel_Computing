@@ -35,13 +35,23 @@ public:
         for (int row = 1; row < size; row++) {
             maxVal = std::max(maxVal, matrix[row * size + col]);
         }
-        matrix[col] = maxVal;  
+        matrix[col * size + col] = maxVal;
     }
 
     static void calculateAllMax(int* matrix, int size) {
         for (int col = 0; col < size; col++) {
             calculateMaxOfColumn(matrix, size, col);
         }
+    }
+
+    static void printMatrix(int* matrix, int size) {
+        for (int row = 0; row < size; row++) {  
+            for (int col = 0; col < size; col++) {
+                std::cout << std::setw(6) << matrix[row * size + col] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
     }
 };
 
@@ -53,12 +63,18 @@ int main() {
     int* matrix = MatrixOperations::allocateMatrix(size);
     MatrixOperations::fillMatrix(matrix, size);
 
+    std::cout << "Initial Matrix:\n";
+    MatrixOperations::printMatrix(matrix, size);
+
     auto startSingleThread = std::chrono::high_resolution_clock::now();
     MatrixOperations::calculateAllMax(matrix, size);
     auto endSingleThread = std::chrono::high_resolution_clock::now();
 
     double durationSingleThread = std::chrono::duration<double, std::milli>(endSingleThread - startSingleThread).count();
     std::cout << "Single-thread execution time: " << durationSingleThread << " ms\n";
+
+    std::cout << "\nMatrix after replacing diagonal with max column values:\n";
+    MatrixOperations::printMatrix(matrix, size);
 
     MatrixOperations::freeMatrix(matrix);
 
