@@ -45,8 +45,8 @@ public:
     }
 
     static void printMatrix(int* matrix, int size) {
-        for (int row = 0; row < size; row++) {  
-            for (int col = 0; col < size; col++) {
+        for (int row = 0; row < std::min(size, 10); row++) { 
+            for (int col = 0; col < std::min(size, 10); col++) {
                 std::cout << std::setw(6) << matrix[row * size + col] << " ";
             }
             std::cout << std::endl;
@@ -63,8 +63,10 @@ int main() {
     int* matrix = MatrixOperations::allocateMatrix(size);
     MatrixOperations::fillMatrix(matrix, size);
 
-    std::cout << "Initial Matrix:\n";
-    MatrixOperations::printMatrix(matrix, size);
+    if (size <= 10) {
+        std::cout << "Initial Matrix:\n";
+        MatrixOperations::printMatrix(matrix, size);
+    }
 
     auto startSingleThread = std::chrono::high_resolution_clock::now();
     MatrixOperations::calculateAllMax(matrix, size);
@@ -73,8 +75,10 @@ int main() {
     double durationSingleThread = std::chrono::duration<double, std::milli>(endSingleThread - startSingleThread).count();
     std::cout << "Single-thread execution time: " << durationSingleThread << " ms\n";
 
-    std::cout << "\nMatrix after replacing diagonal with max column values:\n";
-    MatrixOperations::printMatrix(matrix, size);
+    if (size <= 10) {
+        std::cout << "\nMatrix after replacing diagonal with max column values:\n";
+        MatrixOperations::printMatrix(matrix, size);
+    }
 
     MatrixOperations::freeMatrix(matrix);
 
