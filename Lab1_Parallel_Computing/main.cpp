@@ -27,6 +27,22 @@ public:
             }
         }
     }
+
+    static void calculateMaxOfColumn(int* matrix, int size, int col) {
+        if (col >= size) return;
+
+        int maxVal = matrix[col];
+        for (int row = 1; row < size; row++) {
+            maxVal = std::max(maxVal, matrix[row * size + col]);
+        }
+        matrix[col] = maxVal;  
+    }
+
+    static void calculateAllMax(int* matrix, int size) {
+        for (int col = 0; col < size; col++) {
+            calculateMaxOfColumn(matrix, size, col);
+        }
+    }
 };
 
 int main() {
@@ -35,6 +51,14 @@ int main() {
     std::cin >> size;
 
     int* matrix = MatrixOperations::allocateMatrix(size);
+    MatrixOperations::fillMatrix(matrix, size);
+
+    auto startSingleThread = std::chrono::high_resolution_clock::now();
+    MatrixOperations::calculateAllMax(matrix, size);
+    auto endSingleThread = std::chrono::high_resolution_clock::now();
+
+    double durationSingleThread = std::chrono::duration<double, std::milli>(endSingleThread - startSingleThread).count();
+    std::cout << "Single-thread execution time: " << durationSingleThread << " ms\n";
 
     MatrixOperations::freeMatrix(matrix);
 
