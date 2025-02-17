@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
+#include <cstdlib>  
+#include <ctime> 
 
 
 class MatrixOperations {
@@ -18,24 +20,32 @@ public:
     }
 
     static void fillMatrix(int* matrix, int size) {
-        std::mt19937 rng(111);
-        std::uniform_int_distribution<int> dist(1, 10000);
+        srand(time(nullptr));  
 
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
-                matrix[row * size + col] = dist(rng);
+                matrix[row * size + col] = rand() % 10000 + 1;  
             }
         }
     }
 
     static void calculateMaxOfColumn(int* matrix, int size, int col) {
-        if (col >= size) return;
+        if (col >= size)
+            return;
 
-        int maxVal = matrix[col];
-        for (int row = 1; row < size; row++) {
-            maxVal = std::max(maxVal, matrix[row * size + col]);
+        int maxRow = col;  
+        int maxVal = matrix[col * size + col];  
+
+        for (int row = 0; row < size; row++) {
+            if (matrix[row * size + col] > maxVal) {
+                maxVal = matrix[row * size + col];
+                maxRow = row; 
+            }
         }
-        matrix[col * size + col] = maxVal;
+
+        if (maxRow != col) {
+            std::swap(matrix[col * size + col], matrix[maxRow * size + col]);
+        }
     }
 
     static void calculateAllMax(int* matrix, int size) {
