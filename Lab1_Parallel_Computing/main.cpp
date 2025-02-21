@@ -20,11 +20,12 @@ public:
     }
 
     static void fillMatrix(int* matrix, int size) {
-        srand(time(nullptr));  
+        std::mt19937 rng(111);
+        std::uniform_int_distribution<int> dist(1, 10000);
 
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
-                matrix[row * size + col] = rand() % 10000 + 1;  
+                matrix[row * size + col] = dist(rng);
             }
         }
     }
@@ -65,12 +66,19 @@ public:
     }
 };
 
+void calculateMaxForColumns(int* matrix, int size, int threadId, int threadNum) {
+    for (int col = threadId; col < size; col += threadNum) {
+        MatrixOperations::calculateMaxOfColumn(matrix, size, col);
+    }
+}
+
 int main() {
     int size;
     std::cout << "Enter size of matrix: ";
     std::cin >> size;
 
     int* matrix = MatrixOperations::allocateMatrix(size);
+
     MatrixOperations::fillMatrix(matrix, size);
 
     if (size <= 10) {
@@ -88,6 +96,33 @@ int main() {
     if (size <= 10) {
         std::cout << "\nMatrix after replacing diagonal with max column values:\n";
         MatrixOperations::printMatrix(matrix, size);
+    }
+
+    for (int threadCount = 4; threadCount <= 128; threadCount *= 2) {
+        MatrixOperations::fillMatrix(matrix, size);
+
+        auto startMultiThread = std::chrono::high_resolution_clock::now();
+        auto startThreadCreation = std::chrono::high_resolution_clock::now();
+
+        std::vector<std::thread> threads(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            threads[i] = std::thread(calculateMaxForColumns, matrix, size, i, threadCount);
+        }
+
+        auto endThreadCreation = std::chrono::high_resolution_clock::now();
+
+        for (int i = 0; i < threadCount; i++) {
+            threads[i].join();
+        }
+
+        auto endMultiThread = std::chrono::high_resolution_clock::now();
+
+        double durationMultiThread = std::chrono::duration<double, std::milli>(endMultiThread - startMultiThread).count();
+        double durationThreadCreation = std::chrono::duration<double, std::milli>(endThreadCreation - startThreadCreation).count();
+
+        std::cout << "Number of threads: " << threadCount << ". Execution time = " << durationMultiThread << " ms\n";
+        std::cout << "Time for thread creation: " << durationThreadCreation << " ms\n";
     }
 
     MatrixOperations::freeMatrix(matrix);
